@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>🎯 Painel VIP - Blaze Double</title>
+  <style>
+    body {
+      background-color: #111;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 { color: #00ffcc; margin-bottom: 20px; }
+    .box {
+      background: #222;
+      padding: 15px;
+      margin: 10px auto;
+      border-radius: 10px;
+      max-width: 400px;
+    }
+    .ultimos {
+      font-size: 22px;
+      margin: 10px 0;
+    }
+    .status {
+      font-size: 18px;
+      margin: 10px 0;
+      color: #00ff00;
+    }
+    .erro {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎯 Painel VIP - Blaze Double</h1>
+  <div class="box">
+    <div id="white">Chance de ⚪ WHITE: --%</div>
+    <div id="score">📊 Score: --/100</div>
+    <div id="proximo">⏰ Próxima entrada: --:--</div>
+    <div class="ultimos" id="ultimos">Últimos: </div>
+    <div class="status" id="status">Status: Aguardando...</div>
+  </div>
+
+  <script>
+    function corIcone(cor) {
+      if (cor === 2) return "⚪";
+      if (cor === 1) return "🔴";
+      return "⚫";
+    }
+
+    function proximoHorario() {
+      const agora = new Date();
+      agora.setSeconds(agora.getSeconds() + (10 - agora.getSeconds() % 10));
+      return agora.toTimeString().slice(0,5);
+    }
+
+    async function atualizar() {
+      try {
+        const r = await fetch("https://blaze.com/api/roulette_games/recent");
+        const data = await r.json();
+
+        const ultimos = data.slice(0, 100).map(x => x.color);
+        const ultimosHtml = data.slice(0, 14).map(x => corIcone(x.color)).join(" ");
+        document.getElementById("ultimos").innerText = "Últimos: " + ultimosHtml;
+
+        const branco = ultimos.filter(c => c === 2).length;
+        const chance = (branco / ultimos.length) * 100;
+        const score = Math.min(100, Math.floor(chance * 1.2));
+
+        document.getElementById("white").innerText = `Chance de ⚪ WHITE: ${chance.toFixed(2)}%`;
+        document.getElementById("score").innerText = `📊 Score: ${score}/100`;
+        document.getElementById("proximo").innerText = `⏰ Próxima entrada: ${proximoHorario()}`;
+
+        const status = document.getElementById("status");
+        if (chance >= 99.8) {
+          status.innerText = "✅ ENTRADA NO ⚪ WHITE!";
+          status.className = "status";
+        } else {
+          status.innerText = "⏳ Aguardando oportunidade...";
+          status.className = "status";
+        }
+
+      } catch (e) {
+        const status = document.getElementById("status");
+        status.innerText = "Erro ao buscar dados...";
+        status.className = "status erro";
+      }
+    }
+
+    atualizar();
+    setInterval(atualizar, 15000);
+  </script>
+</body>
+</html>

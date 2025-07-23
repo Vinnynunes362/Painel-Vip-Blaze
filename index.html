@@ -58,7 +58,7 @@
 
     async function atualizar() {
       try {
-        const r = await fetch("https://blaze.com/api/roulette_games/recent");
+        const r = await fetch("https://blaze.bet.br/api/singleplayer-originals/originals/roulette_games/recent/1");
         const data = await r.json();
 
         const ultimos = data.slice(0, 100).map(x => x.color);
